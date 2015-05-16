@@ -1,0 +1,29 @@
+<!DOCTYPE html> 
+<html>
+	<head>
+		<title>GPSdWS</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<script src="gpsdws_client.js"></script>
+		<script src="gpsdws_simple.js"></script>
+	</head>
+	
+	<body>
+		<h1>GPSdWS</h1>
+		<p>Current Location:</p>
+		<table>
+			<tr>
+				<th>Latitude</th>
+				<td id="lat"></td>
+			</tr>
+			<tr>
+				<th>Longitude</th>
+				<td id="lng"></td>
+			</tr>
+		</table>
+
+		<script>
+			gpsdws_simple_test('lat', 'lng');
+		</script>
+	</body>
+</html>
+
