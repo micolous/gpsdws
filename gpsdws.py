@@ -45,22 +45,31 @@ class GPSdWSProtocol(WebSocketServerProtocol):
 
 
 class GPSdWSProtocolFactory(WebSocketServerFactory):
+	protocol = GPSdWSProtocol
+
 	def __init__(self, *args, **kwargs):
 		kwargs['server'] = 'gpsdws/0.1.0'
 		WebSocketServerFactory.__init__(self, *args, **kwargs)
 		self.clients = []
+		self.setProtocolOptions(allowHixie76=True, webStatus=False)
+
+	def startFactory(self):
 		reactor.callInThread(self.gps_processor)
 
+	def stopFactory(self):
+		self.gps.close()
 
 	def gps_processor(self):
 		self.gps = gps.gps()
 		self.gps.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-		for report in self.gps:
+		while reactor.running:
+			report = self.gps.next()
 			reactor.callFromThread(self.broadcast_object, dict(report))
-		
+
 		# GPSD has stopped
-		reactor.stop()
-	
+		reactor.callFromThread(reactor.stop)
+
+
 	def broadcast_object(self, msg):
 		# format into json once
 		msg = dumps(msg, cls=DictWrapperEncoder)
@@ -71,6 +80,23 @@ class GPSdWSProtocolFactory(WebSocketServerFactory):
 			client.sendMessage(msg)
 
 
+class GPSdWSSite(Site):
+	protocol = HTTPChannelHixie76Aware
+
+	def __init__(self, uri, root_path):
+		self.gps_factory = GPSdWSProtocolFactory(uri, debug=False)
+		resource = WebSocketResource(self.gps_factory)
+		root = File(root_path)
+		root.putChild('gpsdws', resource)
+		Site.__init__(self, root)
+
+	def startFactory(self):
+		self.gps_factory.startFactory()
+
+	def stopFactory(self):
+		self.gps_factory.stopFactory()
+
+
 def main(listen_addr='127.0.0.1', port=8947, gpsdws_www_root=DEFAULT_GPSDWS_ROOT, cert=DEFAULT_CERT):
 	# Load server certificate
 	certData = open(DEFAULT_CERT, 'rb').read()
@@ -78,17 +104,7 @@ def main(listen_addr='127.0.0.1', port=8947, gpsdws_www_root=DEFAULT_GPSDWS_ROOT
 
 	# Create server
 	uri = createWsUrl(listen_addr, port)
-	factory = GPSdWSProtocolFactory(uri, debug=False)
-	factory.setProtocolOptions(allowHixie76=True, webStatus=False)
-	factory.protocol = GPSdWSProtocol
-	factory.clients = []
-
-	resource = WebSocketResource(factory)
-	root = File(gpsdws_www_root)
-	root.putChild('gpsdws', resource)
-
-	site = Site(root)
-	site.protocol = HTTPChannelHixie76Aware
+	site = GPSdWSSite(uri, gpsdws_www_root)
 	reactor.listenSSL(port, site, certificate.options(), interface=listen_addr)
 
 if __name__ == '__main__':
