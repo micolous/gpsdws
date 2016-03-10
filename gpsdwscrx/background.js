@@ -4,12 +4,26 @@ var listening_tabs = [];
 gpsd_port_messageHandler = function(msg) {
 	console.log('gpsd: ' + JSON.stringify(msg));
 	
-	if (msg['class'] == 'TPV') {
-		// TODO: Reformat the JSON message consistently.
+	if (msg['class'] == 'TPV' && msg['tag'] == 'RMC') {
+		if (msg['mode'] >= 2) {
+			// We have a fix.
+			position = {
+				coords: {
+					latitude: msg['lat'],
+					longitude: msg['lon'],
+					altitude: msg['alt'],
+					accuracy: msg['epx'] ? msg['epx'] : null,
+					altitudeAccuracy: msg['epv'],
+					heading: (!msg['track'] || msg['speed'] < 0.4) ? NaN : msg['track'],
+					speed: msg['speed']
+				},
+				timestamp: (new Date(msg['time']))
+			};
 	
-		listening_tabs.forEach(function(tab) {
-			chrome.tabs.sendMessage(tab.id, msg);
-		});
+			listening_tabs.forEach(function(tab) {
+				chrome.tabs.sendMessage(tab.id, position);
+			});
+		}
 	}
 };
 
