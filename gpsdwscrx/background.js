@@ -54,19 +54,12 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 
 });
 
-chrome.runtime.onMessage.addListener(function(msg, _, sendResponse) {
-	switch (msg.f) {
-		case 'getCurrentPosition':
-			console.log('getCurrentPosition ');
-			setTimeout(function() {
-				sendResponse({x: 4, y: 10});
-				setTimeout(function() {
-					sendResponse({x: 5, y: 12});
-				}, 1000);
-			}, 3000);
-
-			return true;
-	};			
-
+chrome.tabs.onRemoved.addListener(function(tabId, _) {
+	listening_tabs.forEach(function(tab, index) {
+		if (tab.id == tabId) {
+			listening_tabs.splice(index, 1);
+			return;
+		}
+	});
 });
 

@@ -86,7 +86,7 @@
 	// Show a toast in the browser, to prove we are installed.
 	var toast = document.createElement('div');
 	toast.textContent = 'Location shim installed.';
-	toast.style.position = 'absolute';
+	toast.style.position = 'fixed';
 	toast.style.top = toast.style.left = toast.style.right = 0;
 	toast.style.textAlign = 'center';
 	toast.style.zIndex = 99999;
