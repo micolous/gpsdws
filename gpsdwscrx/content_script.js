@@ -1,3 +1,9 @@
+/*
+ * content_script.js
+ * Inserts the location shim into the page, and plumbs location messages from
+ * the background worker into the shim.
+ */
+
 chrome.runtime.onMessage.addListener(function(msg) {
 	// Got a message from gpsd, send it to the window
 	window.postMessage(msg, '*');
