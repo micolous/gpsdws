@@ -1,9 +1,0 @@
-{
-	"name": "au.id.micolous.gpspipe",
-	"description": "gpspipe",
-	"path": "/usr/local/bin/gpspipew.py",
-	"type": "stdio",
-	"allowed_origins": [
-		"chrome-extension://nfgklbgdbplndaeeejlgpcmldjfhmcmo/"
-	]
-}

@@ -1,5 +1,11 @@
 # gpsdws #
 
+## THIS IS DEPRECATED, USE gpsd-chrome-polyfill instead
+
+This has a bunch of problems with compatibility and security.  [Use gpsd-chrome-polyfill](https://github.com/micolous/gpsd-chrome-polyfill) instead, as this is a slightly less horrible solution.
+
+## Introduction
+
 WebSockets server for gpsd's JSON feed.
 
 This presents a simple service on `wss://localhost:8947/gpsdws` which pushes WebSockets datagrams containing [a single gpsd JSON message](http://www.catb.org/gpsd/gpsd_json.html).
